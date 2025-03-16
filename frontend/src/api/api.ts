@@ -15,7 +15,8 @@ const api = axios.create({
 export interface Team {
   id: number;
   name: string;
-  stadium?: string;
+  team_long_name: string;
+  team_short_name: string;
 }
 
 export interface League {
@@ -32,6 +33,14 @@ export interface Match {
   home_team_goal: number;
   away_team_goal: number;
   date: string;
+  homeTeam?: {
+    team_long_name: string;
+    team_short_name: string;
+  };
+  awayTeam?: {
+    team_long_name: string;
+    team_short_name: string;
+  };
 }
 
 export interface Player {
@@ -95,19 +104,19 @@ export const fetchLeagueById = async (id: number): Promise<League> => {
 
 // 경기 API
 export const fetchMatches = async ({ page = 1, limit = 20 }): Promise<MatchResponse> => {
-    const response = await api.get<MatchResponse>(`/matches`, {
-      params: { page, limit },
-    });
-    return response.data;
-  };
+  const response = await api.get<MatchResponse>(`/matches`, {
+    params: { page, limit },
+  });
+  return response.data;
+};
 
 export const fetchMatchById = async (id: number): Promise<Match> => {
   const response = await api.get<Match>(`/matches/${id}`);
   return response.data;
 };
 
-export const fetchMatchesByLeague = async (leagueId: number): Promise<Match[]> => {
-  const response = await api.get<Match[]>(`/matches/league/${leagueId}`);
+export const fetchMatchesByLeague = async (leagueId: number): Promise<MatchResponse> => {
+  const response = await api.get<MatchResponse>(`/matches/league/${leagueId}`);
   return response.data;
 };
 
@@ -131,6 +140,17 @@ export const fetchMatchPlayers = async (id: number): Promise<Player[]> => {
   return response.data;
 };
 
+// 특정 경기의 통계 데이터 조회
+export const getMatchStatistics = async (matchId: number) => {
+  const response = await api.get(`/matches/${matchId}/statistics`);
+  return response.data;
+};
+  
+  // 특정 경기의 출전 선수 조회
+export const getMatchPlayers = async (matchId: number) => {
+  const response = await api.get(`/matches/${matchId}/players`);
+  return response.data;
+};
 
 
 // 선수 API

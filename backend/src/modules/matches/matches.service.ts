@@ -149,6 +149,27 @@ export class MatchesService {
       }
     };
 
+    // 점유율 데이터 계산
+    const possessionData = parseXmlOrJsonSafely(match.possession);
+    let homePos = Number(possessionData?.homepos || 0);
+    let awayPos = Number(possessionData?.awaypos || 0);
+    
+    // 점유율 합이 0이면 기본값 설정
+    if (homePos === 0 && awayPos === 0) {
+      homePos = 50;
+      awayPos = 50;
+    } else {
+      // 점유율 합이 100이 되도록 정규화
+      const total = homePos + awayPos;
+      homePos = Math.round((homePos / total) * 100);
+      awayPos = Math.round((awayPos / total) * 100);
+      
+      // 합이 정확히 100이 되도록 조정
+      if (homePos + awayPos !== 100) {
+        homePos = 100 - awayPos;
+      }
+    }
+
     return {
       match_info: {
         date: match.date,
@@ -162,18 +183,9 @@ export class MatchesService {
       },
       statistics: {
         goals: parseXmlOrJsonSafely(match.goal),
-        // shots: {
-        //   on: parseXmlOrJsonSafely(match.shoton),
-        //   off: parseXmlOrJsonSafely(match.shotoff),
-        // },
-        // fouls: parseXmlOrJsonSafely(match.foulcommit),
-        // cards: parseXmlOrJsonSafely(match.card),
-        // crosses: parseXmlOrJsonSafely(match.cross),
-        // corners: parseXmlOrJsonSafely(match.corner),
-        // possession: parseXmlOrJsonSafely(match.possession),
         possession: {
-          home: Number(parseXmlOrJsonSafely(match.possession)?.homepos || 0) / 100,
-          away: Number(parseXmlOrJsonSafely(match.possession)?.awaypos || 0) / 100
+          home: homePos,
+          away: awayPos
         },
         shots: {
           on: {
@@ -187,7 +199,6 @@ export class MatchesService {
         },
         corners: parseXmlOrJsonSafely(match.corner)?.corners || 0,
         fouls: parseXmlOrJsonSafely(match.foulcommit)?.foulscommitted || 0
-    
       },
       odds: {
         b365: {
