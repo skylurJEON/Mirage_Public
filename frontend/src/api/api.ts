@@ -48,6 +48,14 @@ export interface Country {
   name: string;
 }
 
+export interface MatchResponse {
+    data: Match[];
+    meta: {
+      page: number;
+      last_page: number;
+    };
+  }
+  
 
 // 팀 API
 export const fetchTeams = async (): Promise<Team[]> => {
@@ -86,10 +94,12 @@ export const fetchLeagueById = async (id: number): Promise<League> => {
 
 
 // 경기 API
-export const fetchMatches = async (): Promise<Match[]> => {
-  const response = await api.get<Match[]>('/matches');
-  return response.data;
-};
+export const fetchMatches = async ({ page = 1, limit = 20 }): Promise<MatchResponse> => {
+    const response = await api.get<MatchResponse>(`/matches`, {
+      params: { page, limit },
+    });
+    return response.data;
+  };
 
 export const fetchMatchById = async (id: number): Promise<Match> => {
   const response = await api.get<Match>(`/matches/${id}`);
